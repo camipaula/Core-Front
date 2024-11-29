@@ -1,12 +1,14 @@
 <template>
     <div class="coordinator-panel">
-        <h1>Panel del Coordinador</h1>
+        <h1>Bienvenido Coordinador</h1>
         <div class="button-group">
             <button @click="navigateTo('createProject')">Crear Proyecto</button>
             <button @click="navigateTo('manageProject')">Gestionar Proyectos</button>
             <button @click="navigateTo('manageTasks')">Gestionar Tareas</button>
-            <button @click="navigateTo('reviewProductivity')">Revisar Productividad</button>
-            <button @click="navigateTo('generateReports')">Generar Reportes</button>
+            <button @click="navigateTo('productividad-empleado')">Revisar Productividad Empleado</button>
+            <button @click="navigateTo('comparar-proyectos')">Comparar Proyectos</button>
+            <button @click="navigateTo('avance-proyecto')">Generar Reportes</button>
+            <button @click="navigateTo('filtrar')">Proyectos en progreso</button>
             <button @click="logout" class="logout-button">Cerrar Sesión</button>
         </div>
     </div>
@@ -36,7 +38,7 @@ export default {
     justify-content: center;
     height: 100vh;
     background-color: #f4f4f9;
-    padding: 20px;
+    padding: 100px;
 }
 
 /* Título */

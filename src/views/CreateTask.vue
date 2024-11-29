@@ -23,10 +23,37 @@
                 </select>
             </div>
 
+            <!-- Mostrar rango de fechas del proyecto -->
+            <div v-if="proyecto">
+                <p><strong>Rango de Fechas del Proyecto:</strong> {{ proyecto.fechaInicio }} - {{ proyecto.fechaFin }}</p>
+            </div>
+
+            <!-- Fecha de Inicio -->
+            <div class="form-group">
+                <label>Fecha de Inicio</label>
+                <input 
+                    type="date" 
+                    v-model="fechaInicio" 
+                    required 
+                    :class="{ 'invalid-date': !isFechaInicioValida }"
+                />
+                <p v-if="!isFechaInicioValida" class="error-message">
+                    La fecha de inicio debe estar entre {{ proyecto.fechaInicio }} y {{ proyecto.fechaFin }}.
+                </p>
+            </div>
+
             <!-- Fecha Estimada de Completación -->
             <div class="form-group">
                 <label>Fecha Estimada de Completación</label>
-                <input type="date" v-model="fechaEstimada" required />
+                <input 
+                    type="date" 
+                    v-model="fechaEstimada" 
+                    required 
+                    :class="{ 'invalid-date': !isFechaEstimadaValida }"
+                />
+                <p v-if="!isFechaEstimadaValida" class="error-message">
+                    La fecha estimada debe ser posterior a la fecha de inicio y estar dentro del rango {{ proyecto.fechaInicio }} - {{ proyecto.fechaFin }}.
+                </p>
             </div>
 
             <!-- Combobox de Empleado Responsable -->
@@ -54,42 +81,95 @@ export default {
             nombre: '',
             descripcion: '',
             categoriaId: '',
+            fechaInicio: '',
             fechaEstimada: '',
             usuarioId: '',
             empleados: [],
-            categorias: []
+            categorias: [],
+            proyecto: null, // Detalles del proyecto seleccionado
+            isFechaInicioValida: true, // Validar la fecha de inicio
+            isFechaEstimadaValida: true // Validar la fecha estimada
         };
     },
     async created() {
         const token = localStorage.getItem('token');
+        const proyectoId = this.$route.params.projectId; // ID del proyecto desde la ruta
 
         try {
+            // Cargar categorías
             const categoriasResponse = await apiClient.get('/api/Categoria', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             this.categorias = categoriasResponse.data;
 
+            // Cargar empleados
             const empleadosResponse = await apiClient.get('/api/Usuario/GetEmpleados', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             this.empleados = empleadosResponse.data;
+
+            // Cargar datos del proyecto
+            const proyectoResponse = await apiClient.get(`/api/Proyecto/${proyectoId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            this.proyecto = proyectoResponse.data;
         } catch (error) {
             console.error("Error al cargar datos:", error);
+        }
+    },
+    watch: {
+        // Validar fecha de inicio
+        fechaInicio(newFechaInicio) {
+            if (this.proyecto) {
+                const fechaInicioProyecto = new Date(this.proyecto.fechaInicio);
+                const fechaFinProyecto = new Date(this.proyecto.fechaFin);
+                const fechaIngresada = new Date(newFechaInicio);
+
+                this.isFechaInicioValida = fechaIngresada >= fechaInicioProyecto && fechaIngresada <= fechaFinProyecto;
+
+                // También validar la fecha estimada si ya fue seleccionada
+                if (this.fechaEstimada) {
+                    const fechaEstimadaIngresada = new Date(this.fechaEstimada);
+                    this.isFechaEstimadaValida = fechaEstimadaIngresada > fechaIngresada && fechaEstimadaIngresada <= fechaFinProyecto;
+                }
+            }
+        },
+        // Validar fecha estimada
+        fechaEstimada(newFechaEstimada) {
+            if (this.proyecto && this.fechaInicio) {
+                const fechaInicioIngresada = new Date(this.fechaInicio);
+                const fechaFinProyecto = new Date(this.proyecto.fechaFin);
+                const fechaIngresada = new Date(newFechaEstimada);
+
+                this.isFechaEstimadaValida = fechaIngresada > fechaInicioIngresada && fechaIngresada <= fechaFinProyecto;
+            }
         }
     },
     methods: {
         async crearTarea() {
             const proyectoId = this.$route.params.projectId;
+
+            if (!this.isFechaInicioValida) {
+                alert("La fecha de inicio no está dentro del rango del proyecto.");
+                return;
+            }
+
+            if (!this.isFechaEstimadaValida) {
+                alert("La fecha estimada no es válida.");
+                return;
+            }
+
             try {
                 const token = localStorage.getItem('token');
                 await apiClient.post('/api/Tarea', {
                     nombre: this.nombre,
                     descripcion: this.descripcion,
                     categoriaId: this.categoriaId,
+                    fechaInicio: this.fechaInicio, // Nueva propiedad
                     fechaEstimada: this.fechaEstimada,
                     usuarioId: this.usuarioId,
                     proyectoId: proyectoId,
-                    statusId: 1
+                    statusId: 1 // Estado inicial
                 }, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -104,6 +184,7 @@ export default {
     }
 };
 </script>
+
 
 <style scoped>
 /* Contenedor principal */
@@ -205,4 +286,14 @@ label {
     margin-bottom: 5px;
     color: #555;
 }
+.invalid-date {
+    border-color: red;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
 </style>

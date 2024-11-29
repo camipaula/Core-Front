@@ -9,6 +9,10 @@ import EditProject from './views/EditProject.vue';
 import EditTask from './views/EditTask.vue';
 import EmployeeView from './views/EmployeeView.vue';
 import PendingTasks from './views/PendingTasks.vue';
+import ProductividadEmpleado from './views/ProductividadEmpleado.vue';
+import CompararProyectos from './views/CompararProyectos.vue';
+import AvanceProyecto from './views/AvanceProyecto.vue';
+import Filtrar from './views/Filtrar.vue';
 
 import apiClient from './api';
 
@@ -65,7 +69,31 @@ const routes = [
         name: 'EditTask', 
         component: EditTask, 
         meta: { requiresAuth: true, role: 'Coordinador' } 
-    }
+    },
+    { 
+        path: '/productividad-empleado', 
+        name: 'ProductividadEmpleado', 
+        component: ProductividadEmpleado, 
+        meta: { requiresAuth: true, role: 'Coordinador' } // Solo accesible para el Coordinador
+    },
+    { 
+        path: '/comparar-proyectos', 
+        name: 'CompararProyectos', 
+        component: CompararProyectos, 
+        meta: { requiresAuth: true, role: 'Coordinador' } // Solo accesible para el Coordinador
+    },
+    { 
+        path: '/avance-proyecto', 
+        name: 'AvanceProyecto', 
+        component: AvanceProyecto, 
+        meta: { requiresAuth: true, role: 'Coordinador' } // Solo accesible para el Coordinador
+    },
+    { 
+        path: '/filtrar', 
+        name: 'Filtrar', 
+        component: Filtrar, 
+        meta: { requiresAuth: true, role: 'Coordinador' } // Solo accesible para el Coordinador
+    },
 ];
 
 const router = createRouter({

@@ -9,7 +9,6 @@
                     <th>Descripción</th>
                     <th>Fecha de Inicio</th>
                     <th>Fecha de Finalización</th>
-                    <th>Avance</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -19,7 +18,6 @@
                     <td>{{ proyecto.descripcion }}</td>
                     <td>{{ new Date(proyecto.fechaInicio).toLocaleDateString('es-ES') }}</td>
                     <td>{{ new Date(proyecto.fechaFin).toLocaleDateString('es-ES') }}</td>
-                    <td>{{ proyecto.avance }}%</td>
                     <td class="actions">
                         <button @click="editarProyecto(proyecto.id)" class="edit-button">Editar</button>
                         <button @click="eliminarProyecto(proyecto.id)" class="delete-button">Eliminar</button>

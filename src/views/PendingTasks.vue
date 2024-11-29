@@ -1,21 +1,22 @@
 <template>
-    <div class="pending-tasks-container">
+    <div class="tasks-container">
         <h2>Tareas Pendientes</h2>
-        <button @click="goBack" class="back-button">Volver</button>
         <table class="tasks-table">
             <thead>
                 <tr>
                     <th>Nombre</th>
                     <th>Descripción</th>
+                    <th>Categoría</th>
                     <th>Fecha Estimada</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="tarea in tareas" :key="tarea.id">
+                <tr v-for="tarea in tareasPendientes" :key="tarea.id">
                     <td>{{ tarea.nombre }}</td>
                     <td>{{ tarea.descripcion }}</td>
+                    <td>{{ tarea.categoriaNombre }}</td>
                     <td>{{ new Date(tarea.fechaEstimada).toLocaleDateString('es-ES') }}</td>
                     <td>
                         <select v-model="tarea.statusId" class="status-select">
@@ -30,9 +31,34 @@
                 </tr>
             </tbody>
         </table>
+
+        <h2>Tareas Completadas</h2>
+        <table class="tasks-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Categoría</th>
+                    <th>Fecha Estimada</th>
+                    <th>Fecha Real</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="tarea in tareasCompletadas" :key="tarea.id">
+                    <td>{{ tarea.nombre }}</td>
+                    <td>{{ tarea.descripcion }}</td>
+                    <td>{{ tarea.categoriaNombre }}</td>
+                    <td>{{ new Date(tarea.fechaEstimada).toLocaleDateString('es-ES') }}</td>
+                    <td>{{ new Date(tarea.fechaReal).toLocaleDateString('es-ES') }}</td>
+                </tr>
+            </tbody>
+        </table>
+
         <p v-if="mensajeExito" class="mensaje-exito">{{ mensajeExito }}</p>
+        <button @click="goBack" class="back-button">Volver</button>
     </div>
 </template>
+
 
 <script>
 import apiClient from '../api';
@@ -40,7 +66,8 @@ import apiClient from '../api';
 export default {
     data() {
         return {
-            tareas: [],
+            tareasPendientes: [],
+            tareasCompletadas: [],
             estados: [],
             mensajeExito: ''
         };
@@ -48,9 +75,15 @@ export default {
     async created() {
         const usuarioId = localStorage.getItem('usuarioId');
         try {
-            const tareasResponse = await apiClient.get(`/api/Tarea/pendientes/${usuarioId}`);
-            this.tareas = tareasResponse.data;
+            // Obtener tareas pendientes
+            const pendientesResponse = await apiClient.get(`/api/Tarea/pendientes/${usuarioId}`);
+            this.tareasPendientes = pendientesResponse.data;
 
+            // Obtener tareas completadas
+            const completadasResponse = await apiClient.get(`/api/Tarea/completadas/${usuarioId}`);
+            this.tareasCompletadas = completadasResponse.data;
+
+            // Obtener lista de estados
             const estadosResponse = await apiClient.get('/api/Status');
             this.estados = estadosResponse.data;
         } catch (error) {
@@ -69,6 +102,7 @@ export default {
                 });
                 this.mensajeExito = `Cambios guardados para la tarea: ${tarea.nombre}`;
                 
+                // Eliminar mensaje después de 3 segundos
                 setTimeout(() => {
                     this.mensajeExito = '';
                 }, 3000);
@@ -83,15 +117,14 @@ export default {
 };
 </script>
 
+
 <style scoped>
-/* Contenedor principal */
-.pending-tasks-container {
+.tasks-container {
     padding: 20px;
     background-color: #f4f4f9;
     min-height: 100vh;
 }
 
-/* Título */
 h2 {
     text-align: center;
     color: #333;
@@ -99,31 +132,10 @@ h2 {
     font-size: 24px;
 }
 
-/* Botón de regresar */
-.back-button {
-    display: inline-block;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
-    background-color: #e0e0e0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.back-button:hover {
-    background-color: #c0c0c0;
-}
-
-/* Tabla de tareas */
 .tasks-table {
     width: 100%;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 20px auto;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -147,7 +159,6 @@ h2 {
     background-color: #f2f2f2;
 }
 
-/* Select de estado */
 .status-select {
     padding: 8px;
     border: 1px solid #ddd;
@@ -156,7 +167,6 @@ h2 {
     width: 100%;
 }
 
-/* Botón Guardar Cambios */
 .save-button {
     padding: 8px 12px;
     font-size: 14px;
@@ -173,11 +183,28 @@ h2 {
     background-color: #218838;
 }
 
-/* Mensaje de éxito */
 .mensaje-exito {
     color: green;
     font-weight: bold;
     text-align: center;
     margin-top: 20px;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+    background-color: #0056b3;
 }
 </style>
