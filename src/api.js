@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-    baseURL: 'https://localhost:7055', //api
+    baseURL: 'https://localhost:7055', //api'
+   // baseURL: 'http://paula1-001-site1.qtempurl.com',
     headers: {
         'Content-Type': 'application/json'
     }
